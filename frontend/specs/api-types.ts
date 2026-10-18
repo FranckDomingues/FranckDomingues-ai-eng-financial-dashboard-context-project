@@ -29,6 +29,23 @@ export interface FacetsResponse {
   max_date: string;
 }
 
+/** One movement returned by GET /api/metrics. */
+export interface FinancialMovement {
+  /** Movement date, represented as an ISO date string. */
+  create_date: string;
+  /** Movement amount. */
+  amount: number;
+  /** Movement operation kind. */
+  operation_type: OperationType;
+  /** Movement category. */
+  category: FinancialCategory;
+  /** Business group for the movement. */
+  business_type: BusinessType;
+}
+
+/** The direct array response body for GET /api/metrics. */
+export type FinancialMovementsResponse = FinancialMovement[];
+
 /** One alert item returned by GET /api/metrics/alerts. */
 export interface AlertEntry {
   /** Period associated with the alert. */
@@ -61,11 +78,11 @@ export type TopCategoriesResponse = CategoryEntry[];
 export interface MetricsSummaryItem {
   /** Date or grouped-period label returned by the API. */
   period: string;
-  /** Sum of income movements in this period. */
+  /** Numeric income value returned for this period. */
   income: number;
-  /** Sum of outcome movements in this period. */
+  /** Numeric outcome value returned for this period. */
   outcome: number;
-  /** Income minus outcome for this period. */
+  /** Numeric net value returned for this period. */
   net: number;
 }
 

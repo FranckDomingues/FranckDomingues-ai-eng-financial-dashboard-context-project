@@ -31,7 +31,12 @@ This checklist tracks the specification-first milestone. Complete phases in orde
 
 - [x] Cross-check every API name, parameter, response property/type, default, and constraint against recorded running `/docs` / OpenAPI evidence.
 - [x] Cross-check F01/F02/F03 against the official assignment; separate assignment requirements from API capabilities.
+- [x] Complete the authoritative frontend README contract index with per-feature objective, endpoint/request/response types, enums/defaults/constraints, component behavior/states, edge cases, acceptance criteria, and OpenAPI evidence links.
+- [x] Add the verified `/api/metrics` response and query types and a distinct `/api/metrics/summary` parameter type; confirm each referenced component/type exists in its source artifact.
+- [x] Specify F03 as two business-specific category requests and two separate summary requests; document aggregation, category share, numeric-zero vs empty/no-period vs failed-request behavior, visible B2B/B2C chart identities, and single-series chart behavior without adding an endpoint.
+- [x] Reconcile date semantics, threshold UI/API distinction, and currency formatting with source evidence and existing frontend convention.
 - [x] Confirm no React application, API-fetch, backend, test, dependency, or runtime configuration files were changed.
 - [x] Review README and specification diffs for scope, accuracy, and link correctness.
-- [x] Run `git diff --check` and report the final changed-file list and any unresolved blockers.
-- [ ] Request human review/approval before committing. Do not commit or push before explicit authorization.
+- [x] Run `docker compose exec -T frontend sh -lc 'npx tsc --noEmit'`, `git diff --check`, and inspect `git status --short --branch`; confirm the final changed-file list and no application/backend/dependency/Docker changes.
+- [x] Request human review before committing; this documentation update is presented for review.
+- [x] Receive explicit human authorization to commit this documentation update. (No push or merge is authorized.)

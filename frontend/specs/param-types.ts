@@ -1,5 +1,6 @@
 import type {
   BusinessType,
+  FinancialCategory,
   MetricsGroupBy,
   OperationType,
 } from "./api-types";
@@ -14,6 +15,26 @@ export interface DateRangeFilter {
   start_date?: string;
   /** Optional upper date bound; backend implementation currently includes this date. */
   end_date?: string;
+}
+
+/** Query parameters for GET /api/metrics. */
+export interface MetricsParams extends DateRangeFilter {
+  /** Optional category filter. */
+  category?: FinancialCategory;
+  /** Optional operation filter. */
+  operation_type?: OperationType;
+}
+
+/** Query parameters for GET /api/metrics/summary. */
+export interface SummaryParams extends DateRangeFilter {
+  /** Grouping granularity; the API default is month. */
+  group_by?: MetricsGroupBy;
+  /** Optional category filter. */
+  category?: FinancialCategory;
+  /** Optional operation filter. */
+  operation_type?: OperationType;
+  /** Optional single business-type filter. */
+  business_type?: BusinessType;
 }
 
 /** Query parameters for GET /api/metrics/alerts. */

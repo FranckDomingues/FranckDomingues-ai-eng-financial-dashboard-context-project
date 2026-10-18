@@ -164,7 +164,9 @@ These response aliases and fields are the verified contracts in `api-types.ts`: 
 
 **Data dependencies and allowed composition:** There is no verified combined B2B/B2C comparison endpoint. The approved frontend composition is two `/api/metrics/categories/top` requests, each with `operation_type: "income"`, `limit: 5`, the same optional dates, and the corresponding `business_type` (`"B2B"` or `"B2C"`); plus two `/api/metrics/summary` requests with the same date bounds and respective business type, using one common `group_by` (normally `month` for chart presentation). `group_by` is a summary query parameter, and `MetricsSummaryItem` is now included as a verified response type. This is frontend composition of existing API contracts, not a new endpoint or combined response schema.
 
-For each business group, the denominator is the sum of its returned summary `income` values. For an income category with a returned category total, percentage is `total_amount / groupIncome * 100`. Summary aggregation is source-verified to place each movement in one bucket; period amounts are rounded to two decimals. Thus displayed group totals are safe from bucket double counting but may differ slightly from raw movement totals due to rounding/floating-point arithmetic. The existing backend tests do not assert this exact aggregation-total invariant.
+The summary request type is `SummaryParams` from `param-types.ts` (not `MetricsParams`, which belongs to `GET /api/metrics`). It carries optional `start_date`, `end_date`, `group_by`, `category`, `operation_type`, and one `business_type`; for this comparison use identical date bounds and grouping and omit category/operation filters to obtain the group's overall income series.
+
+For each business group with a nonempty successful summary response, the denominator is the sum of its returned summary `income` values. For an income category with a returned category total, percentage is `total_amount / groupIncome * 100`. A computed numeric total of exactly zero is confirmed zero income; an empty summary array has no numeric evidence and must not be reduced to a fabricated zero. Summary aggregation is source-verified to place each movement in one bucket; period amounts are rounded to two decimals. Thus displayed group totals are safe from bucket double counting but may differ slightly from raw movement totals due to rounding/floating-point arithmetic. The existing backend tests do not assert this exact aggregation-total invariant.
 
 **User interaction:** The page includes the shared `DateRangeFilter` and invokes `onDateRangeChange`. Both groups' category and summary data must represent the same selected date bounds. No per-business date selectors are specified.
 
@@ -175,7 +177,7 @@ For each business group, the denominator is the sum of its returned summary `inc
 - When loaded, render the B2B and B2C panels independently so a genuine empty category response for one group can have its own empty state.
 - Render exactly one income comparison chart below both panels, using the two summary series and shared date range. The date filter uses the supplied facets and `onDateRangeChange` callback.
 
-**Validation and edge cases:** Do not show a successful comparison if any of the four required datasets is still `null`; route such state through loading/error handling. Both category and summary inputs must correspond to the same optional date bounds and business filter. Keep one group's successful empty data separate from the other group's data. A zero-valued total is valid data and is handled by the panel, not reclassified as missing.
+**Validation and edge cases:** Do not show a successful comparison if any of the four required datasets is still `null`; route such state through loading/error handling. Both category and summary inputs must correspond to the same optional date bounds and business filter. Keep one group's successful empty data separate from the other group's data. A computed numeric zero from a nonempty summary is valid data; an empty summary indicates no period data and must not be treated as numeric zero.
 
 **Acceptance criteria:** The page synchronizes one date range across both groups, distinguishes loading/error from successful group-level emptiness, renders both panels and exactly one chart in the required order when loaded, and only composes existing endpoints/contracts.
 
@@ -189,7 +191,7 @@ For each business group, the denominator is the sum of its returned summary `inc
 interface BusinessCategoryPanelProps {
   businessType: BusinessType;
   categories: TopCategoriesResponse;
-  groupIncome: number;
+  groupIncome: number | null;
   formatAmount: (amount: number) => string;
 }
 ```
@@ -199,14 +201,15 @@ The parent supplies entries scoped to the indicated `businessType`; `CategoryEnt
 **Conditional rendering and edge cases:**
 
 - If the successful categories array is empty, show a per-business empty message (for example, “No income categories for B2B in this date range.”) without suppressing the other panel.
-- If `groupIncome === 0`, display category amounts, but show the percentage as **N/A**; never divide by zero or imply a meaningful percentage.
+- If `groupIncome === 0` based on a nonempty successful summary, display the numeric group total as `0` and category amounts, but show the percentage as **N/A**; never divide by zero or imply a meaningful percentage.
+- If `groupIncome === null` because its summary request is not yet successful or the successful summary array is empty, show the corresponding loading/error/no-income-data state; do not display `0` or calculate category shares. The page owns the request state and this is a UI distinction, not an API response field.
 - If a category is absent from a top-five response, do not infer its total is zero. It means only that the API did not return it in that limited result. Do not insert a zero-valued category row.
 - If `groupIncome` is positive, compute the percentage from the returned `total_amount` as described above. Round only for display; preserve the numeric value for calculations.
 - Format category amounts with `formatAmount`; the parent should supply the existing dashboard `formatCurrency` convention (en-US USD, zero displayed fraction digits), not infer currency metadata from the API.
 
 **User interaction:** Read-only panel; no per-category action is specified. Date changes are handled by the page-level shared filter, not by an individual panel.
 
-**Validation:** Display only `income` entries for the selected panel and limit the rendered list to at most five items. The parent must supply a finite nonnegative `groupIncome` derived from the matching group's summary income; if unavailable, the parent must keep the page in loading/error state rather than present a fabricated zero denominator.
+**Validation:** Display only `income` entries for the selected panel and limit the rendered list to at most five items. The parent supplies `groupIncome` as a numeric sum from a nonempty successful matching summary, or `null` when no summary total is established (including a successful empty array). Do not substitute zero for `null`. A numeric zero total is retained as zero and uses N/A shares.
 
 **Acceptance criteria:** The panel identifies its B2B/B2C group, shows category/amount/share for no more than five valid income entries, independently renders its empty state, and shows N/A rather than dividing by zero when the group's real total is zero.
 
@@ -226,15 +229,17 @@ interface IncomeComparisonChartProps {
 
 **Data dependency:** The `income` and `period` properties only. The two summary arrays use the same `group_by` and date bounds. Align points by period string; do not treat a period absent from one series as a verified zero. Represent a missing point as a gap/absent value, with a legend or accessible note that it was not returned for that group. Monetary axis/tooltip values use `formatAmount`.
 
-**Zero/empty behavior:** A present period with `income: 0` is a numeric zero and may be plotted as zero. An empty summary array is not itself a data error; render the chart's explicit no-periods state. It is distinct from a missing category in a top-five response.
+**Zero/empty behavior:** A present period with `income: 0` is confirmed numeric zero and must be shown as zero. A nonempty summary whose income values sum to zero also establishes numeric group total zero. An empty summary array is not itself a data error, but supplies no numeric total; render that group's explicit no-period/no-income-data state rather than zero. It is distinct from a missing category in a top-five response.
 
 **User interaction:** Read-only comparison chart; no chart selection/drill-down interaction is specified.
 
 **Conditional rendering:** Render one chart only after both summary inputs are successfully available. If both arrays contain no periods, render an explicit no-periods message in place of plotted series. If only one group has periods, retain the available series and represent the other as absent/gaps with an accessible note, not as zero. The current requirement does not specify partial chart rendering for this case; confirm the intended UI behavior before treating this partial-series policy as final. Page-level loading/error handling remains the page's responsibility.
 
+**Zero, no-data, and error distinction — UI SPEC, not OpenAPI guarantees:** A successfully returned summary containing numeric `income: 0` is confirmed zero for that period and must be plotted/displayed as numeric zero. A successful empty summary (`[]`) has no numeric income evidence; show an explicit no-period/no-income-data state for that identified business group, not zero. A failed summary request is an error and must never be converted to an empty success or zero. Preserve B2B and B2C identities in the chart legend/series and in any no-data message, including when one group has no periods.
+
 **Validation:** Both inputs must be summary arrays representing the same selected date range and same grouping granularity. Use only `period` and numeric `income`; preserve missing-series periods as gaps rather than zero and do not mutate the supplied arrays.
 
-**Acceptance criteria:** The chart aligns matching periods, presents separate B2B and B2C income series below the panels, displays a real zero distinctly from a missing point, uses the shared amount formatter, and gives an explicit no-periods state without inventing values.
+**Acceptance criteria:** The chart aligns matching periods, presents separately identified B2B and B2C income series below the panels, displays a real numeric zero distinctly from a missing point or empty series, keeps a failed request in the page error state, uses the shared amount formatter, and gives an explicit per-group no-periods state without inventing values.
 
 **Acceptance criteria for F03:**
 
