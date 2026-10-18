@@ -4,20 +4,20 @@ This checklist tracks the specification-first milestone. Complete phases in orde
 
 ## Phase 1 — Confirm milestone scope
 
-- [ ] Read the Delivery 02 assignment and confirm F01 date-range filtering, F02 anomaly alerts, and F03 B2B-versus-B2C comparison are the requested feature areas.
-- [ ] Confirm scope excludes React implementation, frontend API-fetch integration, and backend changes.
-- [ ] Record questions or ambiguous requirements; do not resolve them by inventing behavior or schemas.
+- [x] Read the Delivery 02 assignment and confirm F01 date-range filtering, F02 anomaly alerts, and F03 B2B-versus-B2C comparison are the requested feature areas.
+- [x] Confirm scope excludes React implementation, frontend API-fetch integration, and backend changes.
+- [x] Record questions or ambiguous requirements; do not resolve them by inventing behavior or schemas.
 
 ## Phase 2 — Verify the running API contract
 
-- [ ] Start or access the backend using the repository-documented workflow, without changing application or runtime configuration.
-- [ ] Open the running backend's `/docs` and inspect the relevant documented operations and schemas.
-- [ ] Record the verification date/context and the exact OpenAPI evidence for each applicable operation.
-- [ ] Verify operation names, parameter names and types, required/optional status, defaults and constraints, response properties and types, and response shape.
-- [ ] For F01, establish whether and how date-range filtering is documented.
-- [ ] For F02, establish whether and how anomaly alerts are documented.
-- [ ] For F03, establish whether a comparison operation or supported business-type inputs are documented; record any gap without assuming client-side composition.
-- [ ] If `/docs` cannot be reached because of the known proxy/network issue, record the blocker and stop for direction. Do not troubleshoot unless separately authorized.
+- [x] Start or access the backend using the repository-documented workflow, without changing application or runtime configuration.
+- [x] Open the running backend's `/docs` and inspect the relevant documented operations and schemas.
+- [x] Record the verification date/context and the exact OpenAPI evidence for each applicable operation.
+- [x] Verify operation names, parameter names and types, required/optional status, defaults and constraints, response properties and types, and response shape.
+- [x] For F01, establish whether and how date-range filtering is documented.
+- [x] For F02, establish whether and how anomaly alerts are documented.
+- [x] For F03, establish whether a comparison operation or supported business-type inputs are documented; record any gap without assuming client-side composition.
+- [x] If `/docs` cannot be reached because of the known proxy/network issue, record the blocker and stop for direction. Do not troubleshoot unless separately authorized. (Not applicable: live `/docs` and `/openapi.json` were reachable.)
 
 ## Phase 3 — Write verified specifications
 
