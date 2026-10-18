@@ -17,6 +17,29 @@ _Estas instrucciones están [disponibles en español](./README.es.md)._
 
 _Financial metrics dashboard with a React + TypeScript frontend and a FastAPI backend._
 
+## Academic deliveries
+
+This repository is organized around two academic deliveries:
+
+### Delivery 01 — Context Engineering
+
+- **Status:** Completed
+- **Objective:** Analyze, understand, and document the inherited financial dashboard.
+- **Context artifacts:** [`memory-bank/`](memory-bank/), [`.agents/rules/`](.agents/rules/), and the original project documentation, including [`SPECS.md`](SPECS.md), [`verification.md`](verification.md), and [`docs/engineering-findings.md`](docs/engineering-findings.md).
+
+Delivery 01 records the inherited baseline and its evidence. Its history and artifacts are retained as completed; this README organization does not rewrite that delivery.
+
+### Delivery 02 — Specification-Driven Development
+
+- **Status:** In Progress
+- **Branch:** `feature/frontend-specs`
+- **Objective:** Define verified frontend specifications for three new financial dashboard features.
+- **Features:** Date-range filtering, anomaly alerts, and B2B vs B2C comparison.
+- **Deliverables:** `frontend/specs/api-types.ts`, `frontend/specs/param-types.ts`, `frontend/specs/components.md`, and [`frontend/specs/README.md`](frontend/specs/README.md).
+- **Scope boundary:** React implementation, frontend API-fetch integration, and backend modification are out of scope.
+
+API operation names, parameters, and response properties for Delivery 02 must be verified against the running backend's `/docs` / OpenAPI documentation before being specified. See [`docs/delivery-02/SPECS.md`](docs/delivery-02/SPECS.md) and [`docs/delivery-02/TODO.md`](docs/delivery-02/TODO.md) for milestone scope and verification steps.
+
 ## Recommended steps
 
 1. Fork this repository to your account.
