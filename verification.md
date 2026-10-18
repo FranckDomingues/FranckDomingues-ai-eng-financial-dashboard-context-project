@@ -130,3 +130,22 @@ The host environment did not contain all project dependencies. Checks were ultim
 - The Vite build output is ignored by `frontend/.gitignore`; no generated files are listed. The only current untracked files are the two approved documentation files.
 - `git diff --check` completed without output for tracked changes. Since untracked files are omitted by ordinary `git diff --check`, both new documents were also checked with `git diff --no-index --check /dev/null <file>`; no whitespace errors were reported.
 - The integration investigation used read-only requests, environment inspection, logs, and Docker metadata; it made no source/configuration changes. The two Phase 1 documents are the only repository additions.
+
+## Phase 3 Rule Validation
+
+- **Task performed:** Added a concise root README section explaining how to run the existing frontend and backend validation commands from the repository root using their Compose containers.
+- **Rule IDs applied:** R-DOC-01 (inspect repository instruction paths), R-DOC-02 (use the project/container context and distinguish blockers), R-CFG-03 (describe the existing Compose development environment), and R-TEST-03 (use declared checks and report outcomes/warnings separately).
+- **Repository evidence consulted:** `AGENTS.md`; all three `.agents/rules/*.md` files; `frontend/package.json`; `backend/requirements.txt`; `docker-compose.yml`; `frontend/Dockerfile`; `backend/Dockerfile`; `frontend/vite.config.ts`; existing “How to run locally” section of `README.md`; and this verification record. `.agents/skills` and `memory-bank` were checked and are absent.
+- **Exact commands executed:** `git branch --show-current`; `git rev-parse HEAD`; `git status --short --untracked-files=all`; `docker compose ps`; `docker compose exec -T frontend npm test`; `docker compose exec -T frontend npm run lint`; `docker compose exec -T frontend npm run build`; `docker compose exec -T backend pytest`.
+- **Initial attempt (preserved):** At HEAD `213df1db7b4c0c81140ad2030ae4c7f5e98f8b18` on branch `main`, `docker compose ps` listed no running containers. The four `docker compose exec` attempts below each exited 1 with the respective service not running; they were blocked and are not represented as test failures or passes:
+	- `docker compose exec -T frontend npm test` — `service "frontend" is not running`.
+	- `docker compose exec -T frontend npm run lint` — `service "frontend" is not running`.
+	- `docker compose exec -T frontend npm run build` — `service "frontend" is not running`.
+	- `docker compose exec -T backend pytest` — `service "backend" is not running`.
+- **Subsequent validation:** After the human/environment reported Compose startup, ran `docker compose up -d --build` (exit 0; both images built and services started/running). Then ran the following exact commands; all exited 0:
+	- `docker compose exec -T backend pytest` — **PASS:** 15 passed; one `StarletteDeprecationWarning` from `fastapi/testclient.py` says using `httpx` with `starlette.testclient` is deprecated and recommends `httpx2`.
+	- `docker compose exec -T frontend npm test` — **PASS:** 1 test file, 5 tests passed.
+	- `docker compose exec -T frontend npm run lint` — **PASS:** completed with no reported lint warnings/errors.
+	- `docker compose exec -T frontend npm run build` — **PASS:** `tsc -b` and Vite build completed. Vite warned the minified JavaScript chunk is 584.26 kB, exceeding its 500 kB warning threshold.
+- **Warnings or blockers:** The initial stopped-service blocker was cleared by starting Compose; all four checks were subsequently executed successfully. The deprecation and bundle-size warnings remain unmodified. The prior frontend proxy 502/TCP-timeout root cause remains unresolved and was not investigated or changed; this task does not claim frontend proxy integration success.
+- **Files changed for Phase 3 documentation:** `README.md`, `verification.md`, and `docs/agent-collaboration-log.md`. No source, tests, dependencies, Docker configuration, or rule files were changed; no memory bank was created.

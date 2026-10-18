@@ -49,6 +49,19 @@ If you need to target a different backend origin, copy `frontend/.env.example` t
 - Backend: http://localhost:8000
 - API documentation: http://localhost:8000/docs
 
+## Run validation checks
+
+Start the Compose services with `docker compose up --build`. In a second terminal, run the existing checks from the repository root:
+
+```bash
+docker compose exec -T frontend npm test
+docker compose exec -T frontend npm run lint
+docker compose exec -T frontend npm run build
+docker compose exec -T backend pytest
+```
+
+The frontend commands use scripts declared in `frontend/package.json`; backend tests run in the backend container with dependencies from `backend/requirements.txt`. The services must be running before using `docker compose exec`.
+
 ---
 
 This and many other projects are built by students as part of the [Career Programs](https://4geeksacademy.com/compare-programs) at [4Geeks Academy](https://4geeksacademy.com). By [@marcogonzalo](https://github.com/marcogonzalo) and [other contributors](https://github.com/4GeeksAcademy/ai-eng-financial-dashboard-context-project/graphs/contributors). Find out more about [AI Engineering](https://4geeksacademy.com/en/coding-bootcamps/ai-engineering), [Data Science & Machine Learning](https://4geeksacademy.com/en/coding-bootcamps/data-science-ml), [Cybersecurity](https://4geeksacademy.com/en/coding-bootcamps/cybersecurity) and [Full-Stack Software Developer with AI](https://4geeksacademy.com/en/coding-bootcamps/full-stack-developer).
