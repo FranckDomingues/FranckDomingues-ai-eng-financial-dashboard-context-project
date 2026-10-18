@@ -21,17 +21,17 @@ This checklist tracks the specification-first milestone. Complete phases in orde
 
 ## Phase 3 — Write verified specifications
 
-- [ ] Define or update `frontend/specs/api-types.ts` only with response types verified from OpenAPI.
-- [ ] Define or update `frontend/specs/param-types.ts` only with parameters verified from OpenAPI.
-- [ ] Write `frontend/specs/components.md` with approved frontend behavior, inputs, outputs, and unresolved decisions; do not describe unimplemented React work as complete.
-- [ ] Update `frontend/specs/README.md` with artifact links, evidence references, verification context, and explicit scope boundaries.
-- [ ] Mark unavailable or ambiguous API contracts as pending; do not create placeholder fields that could be mistaken for verified schemas.
+- [x] Define or update `frontend/specs/api-types.ts` only with response types verified from OpenAPI.
+- [x] Define or update `frontend/specs/param-types.ts` only with parameters verified from OpenAPI.
+- [x] Write `frontend/specs/components.md` with approved frontend behavior, inputs, outputs, and unresolved decisions; do not describe unimplemented React work as complete.
+- [x] Update `frontend/specs/README.md` with artifact links, evidence references, verification context, and explicit scope boundaries.
+- [x] Mark unavailable or ambiguous API contracts as pending; do not create placeholder fields that could be mistaken for verified schemas.
 
 ## Phase 4 — Review and validate documentation
 
-- [ ] Cross-check every API name, parameter, response property/type, default, and constraint against recorded running `/docs` / OpenAPI evidence.
-- [ ] Cross-check F01/F02/F03 against the official assignment; separate assignment requirements from API capabilities.
-- [ ] Confirm no React application, API-fetch, backend, test, dependency, or runtime configuration files were changed.
-- [ ] Review README and specification diffs for scope, accuracy, and link correctness.
-- [ ] Run `git diff --check` and report the final changed-file list and any unresolved blockers.
+- [x] Cross-check every API name, parameter, response property/type, default, and constraint against recorded running `/docs` / OpenAPI evidence.
+- [x] Cross-check F01/F02/F03 against the official assignment; separate assignment requirements from API capabilities.
+- [x] Confirm no React application, API-fetch, backend, test, dependency, or runtime configuration files were changed.
+- [x] Review README and specification diffs for scope, accuracy, and link correctness.
+- [x] Run `git diff --check` and report the final changed-file list and any unresolved blockers.
 - [ ] Request human review/approval before committing. Do not commit or push before explicit authorization.

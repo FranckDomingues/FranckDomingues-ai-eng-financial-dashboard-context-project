@@ -113,7 +113,7 @@ All query parameters are optional:
 - Each item has required, non-nullable properties: `period` (string), `income` (number), `outcome` (number), and `net` (number).
 - HTTP 422 response references `#/components/schemas/HTTPValidationError`.
 
-OpenAPI confirms the parameters and response shape; it does not explicitly state aggregation semantics such as whether summing `income` across returned periods equals total income for an arbitrary requested date range. That semantic is **UNVERIFIED by the schema alone** and needs a separately documented requirement/behavior check before being treated as a guarantee.
+OpenAPI confirms the parameters and response shape, but the schema alone does not specify the aggregation rule. **VERIFIED by read-only source inspection:** `get_metrics_summary` first filters movements by `business_type`, then applies the shared date/operation filters, then calls `summarize_movements`. That helper assigns each movement to exactly one date/week/month key, accumulates `amount` once into that operation's bucket, and returns one item per bucket. Therefore the unrounded grouped `income` buckets are disjoint and summable without double counting for the requested range. Each bucket is rounded to two decimal places before serialization; summing serialized buckets can consequently differ by small rounding error from summing raw movement amounts. **OBSERVED:** For 2025-11-15 through 2026-03-17, sums of returned `income` matched direct filtered B2B/B2C income movement totals to floating-point/rounding precision for `group_by=day`, `week`, and `month`. This is an implementation observation, not an OpenAPI guarantee; re-verify if backend aggregation changes.
 
 ### `GET /api/metrics/comparison`
 
@@ -143,14 +143,14 @@ OpenAPI confirms the parameters and response shape; it does not explicitly state
 
 - **VERIFIED:** `/api/metrics` uses optional `start_date` and `end_date` date strings; `/api/metrics/facets` exposes required `min_date` and `max_date` date strings.
 - **OBSERVED:** The sample facets response contained a current data range, but those date values are not permanent guarantees.
-- **UNVERIFIED:** Whether range bounds are inclusive, behavior for reversed or out-of-range dates, and the UI interaction for selecting a range are not fully established by OpenAPI.
+- **VERIFIED by source inspection (not OpenAPI):** the backend applies inclusive bounds (`create_date >= start_date`, `create_date <= end_date`); either bound can be provided independently. **UNVERIFIED:** reversed-range and out-of-facets behavior is not specified by OpenAPI; UI rejection of reversed/out-of-facets ranges is a frontend decision.
 - **SPEC DECISION:** Parameter type documentation uses the verified snake_case names and documents date strings in `YYYY-MM-DD` format. This is a representation of the OpenAPI date format, not an additional API constraint.
 
 ### F02 — Anomaly alerts
 
 - **VERIFIED:** `/api/metrics/alerts` exposes `threshold >= 0`, default `0.3`, with no documented upper bound, and returns the four required fields listed above.
 - **SPEC DECISION:** The requested frontend threshold control range is `0.01` to `1.0`, with UI default `0.3`. These are frontend UI restrictions/default, not backend OpenAPI validation. The API accepts values at least zero and has no documented maximum; callers must not claim that OpenAPI enforces the UI range.
-- **UNVERIFIED:** The assignment's UI range does not specify whether the UI default is submitted explicitly or simply matches the API default. Alert display/wording and the semantic interpretation of `increase_ratio` remain unverified beyond its documented property name and numeric schema.
+- **SPEC DECISION:** the selected threshold is explicitly sent by the frontend when alert parameters change. **VERIFIED by source inspection (not OpenAPI):** `increase_ratio` is computed as `(period outcome - prior-period baseline average) / baseline average` when the baseline is positive; percentage display multiplies this ratio by 100. Empty-state wording is a UI/product presentation choice. The API provides no currency metadata; existing dashboard formatting uses `formatCurrency` in `frontend/src/lib/financial-utils.ts` (en-US USD with zero displayed fraction digits), which component specs reuse as a frontend convention.
 
 ### F03 — B2B versus B2C income and category comparison
 
@@ -158,7 +158,7 @@ OpenAPI confirms the parameters and response shape; it does not explicitly state
 - **VERIFIED:** `/api/metrics/summary` accepts one business-type filter and returns per-period `income`, `outcome`, and `net` values. `/api/metrics/comparison` is a current-versus-previous-period net comparison with one optional business type; it is not a B2B-versus-B2C comparison.
 - **MISMATCH:** No inspected OpenAPI operation returns B2B and B2C income totals together, nor a direct B2B-vs-B2C comparison result.
 - **SPEC DECISION (proposed frontend composition, not a new backend contract):** Make two filtered calls to `/api/metrics/categories/top`, one with each `business_type`, using `operation_type=income` and `limit=5`; separately obtain grouped income from `/api/metrics/summary` for each business type using the same date filter. For each group, sum the returned `income` values across requested periods to form a total, then calculate each category percentage against that group's total income. Do not implement fetching or aggregation in this milestone.
-- **UNVERIFIED / follow-up:** Confirm the summary aggregation/date-period semantics for the intended range before treating the sum as a guaranteed total. Clarify behavior when a business group's total income is zero, and how the UI presents category entries that are absent from one group's top-five result. The specified top-five limit is within the verified API maximum, but top-five selection is a specification decision.
+- **VERIFIED by source inspection + OBSERVED live cross-check:** summary filtering is applied before grouping; each movement belongs to exactly one group bucket, so group `income` values can be summed without double counting. Each bucket is rounded to two decimals, and the existing tests do not assert an exact aggregate-total invariant; see the summary section above. **SPEC DECISION:** for zero group income, show category amounts and `N/A` for percentages. A category absent from a limited top-five result is not presumed to have zero total. The specified top-five limit is within the verified API maximum; top-five selection is a specification decision.
 
 ## Evidence limitations
 

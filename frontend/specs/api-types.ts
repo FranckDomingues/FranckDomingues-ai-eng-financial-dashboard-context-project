@@ -56,3 +56,18 @@ export interface CategoryEntry {
 
 /** The direct array response body for GET /api/metrics/categories/top. */
 export type TopCategoriesResponse = CategoryEntry[];
+
+/** One grouped metrics item returned by GET /api/metrics/summary. */
+export interface MetricsSummaryItem {
+  /** Date or grouped-period label returned by the API. */
+  period: string;
+  /** Sum of income movements in this period. */
+  income: number;
+  /** Sum of outcome movements in this period. */
+  outcome: number;
+  /** Income minus outcome for this period. */
+  net: number;
+}
+
+/** The direct array response body for GET /api/metrics/summary. */
+export type SummaryResponse = MetricsSummaryItem[];

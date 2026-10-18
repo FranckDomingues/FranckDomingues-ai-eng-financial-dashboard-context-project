@@ -10,9 +10,9 @@ import type {
  * callers should use the YYYY-MM-DD representation of the API date format.
  */
 export interface DateRangeFilter {
-  /** Inclusive/exclusive range semantics are not specified by OpenAPI. */
+  /** Optional lower date bound; backend implementation currently includes this date. */
   start_date?: string;
-  /** Inclusive/exclusive range semantics are not specified by OpenAPI. */
+  /** Optional upper date bound; backend implementation currently includes this date. */
   end_date?: string;
 }
 
